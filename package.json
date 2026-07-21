@@ -1,0 +1,640 @@
+{
+  "name": "cses-studio",
+  "displayName": "CSES Studio",
+  "description": "Browse, solve, test and submit CSES Problem Set tasks without leaving VS Code.",
+  "version": "0.1.0",
+  "publisher": "cses-studio",
+  "license": "MIT",
+  "author": "Revant Sinha",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Revant-S/cses_studio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Revant-S/cses-studio/issues"
+  },
+  "homepage": "https://github.com/Revant-S/cses-studio#readme",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Education",
+    "Programming Languages",
+    "Testing"
+  ],
+  "keywords": [
+    "cses",
+    "competitive programming",
+    "algorithms",
+    "icpc",
+    "problem set"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "csesStudio",
+          "title": "CSES",
+          "icon": "resources/cses.svg"
+        }
+      ],
+      "panel": [
+        {
+          "id": "csesStudioPanel",
+          "title": "CSES Tests",
+          "icon": "resources/cses.svg"
+        }
+      ]
+    },
+    "views": {
+      "csesStudio": [
+        {
+          "id": "csesStudio.browser",
+          "name": "Problems",
+          "type": "webview"
+        },
+        {
+          "id": "csesStudio.contest",
+          "name": "Contest",
+          "type": "webview",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "csesStudio.problems",
+          "name": "Tree",
+          "icon": "resources/cses.svg",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "csesStudio.progress",
+          "name": "Progress",
+          "icon": "resources/cses.svg",
+          "visibility": "collapsed"
+        }
+      ],
+      "csesStudioPanel": [
+        {
+          "id": "csesStudio.tests",
+          "name": "Test Cases",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "csesStudio.problems",
+        "contents": "No problems cached for this site yet.\n\n[Fetch Problems](command:cses.fetchProblems)\n\nBrowse CSES or the AtCoder Educational DP contest.\n[Switch Site](command:cses.switchJudge)\n\nSign in to submit and sync progress.\n[Login](command:cses.login)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "cses.fetchProblems",
+        "title": "Fetch Problems",
+        "category": "CSES",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "cses.refresh",
+        "title": "Refresh",
+        "category": "CSES",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cses.openProblem",
+        "title": "Open Problem",
+        "category": "CSES",
+        "icon": "$(book)"
+      },
+      {
+        "command": "cses.runSamples",
+        "title": "Run Samples",
+        "category": "CSES",
+        "icon": "$(play)"
+      },
+      {
+        "command": "cses.runCustomTest",
+        "title": "Run Custom Test",
+        "category": "CSES",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "cses.submit",
+        "title": "Submit",
+        "category": "CSES",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "cses.login",
+        "title": "Login (current site)",
+        "category": "CSES",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "cses.logout",
+        "title": "Logout (current site)",
+        "category": "CSES",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "cses.searchProblem",
+        "title": "Search Problem",
+        "category": "CSES",
+        "icon": "$(search)"
+      },
+      {
+        "command": "cses.syncProgress",
+        "title": "Sync Progress From Account",
+        "category": "CSES",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "cses.filter.all",
+        "title": "Show All Problems",
+        "category": "CSES",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "cses.filter.unsolved",
+        "title": "Show Unsolved Only",
+        "category": "CSES",
+        "icon": "$(filter-filled)"
+      },
+      {
+        "command": "cses.openInBrowser",
+        "title": "Open in Browser",
+        "category": "CSES",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "cses.copyProblemId",
+        "title": "Copy Problem ID",
+        "category": "CSES"
+      },
+      {
+        "command": "cses.showOutput",
+        "title": "Show Extension Log",
+        "category": "CSES",
+        "icon": "$(output)"
+      },
+      {
+        "command": "cses.filterProblems",
+        "title": "Filter Problem List",
+        "category": "CSES",
+        "icon": "$(list-filter)"
+      },
+      {
+        "command": "cses.exportSubmitPage",
+        "title": "Export Submit Page (Diagnostics)",
+        "category": "CSES",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "cses.openSolveLayout",
+        "title": "Open Solve Layout",
+        "category": "CSES",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "cses.toggleRevision",
+        "title": "Mark / Unmark for Revision",
+        "category": "CSES",
+        "icon": "$(star-empty)"
+      },
+      {
+        "command": "cses.filter.revision",
+        "title": "Show Marked for Revision",
+        "category": "CSES",
+        "icon": "$(star-empty)"
+      },
+      {
+        "command": "cses.filter.allRevision",
+        "title": "Clear Revision Filter",
+        "category": "CSES",
+        "icon": "$(star-full)"
+      },
+      {
+        "command": "cses.markRevision",
+        "title": "Mark for Revision",
+        "category": "CSES",
+        "icon": "$(star-empty)"
+      },
+      {
+        "command": "cses.unmarkRevision",
+        "title": "Unmark for Revision",
+        "category": "CSES",
+        "icon": "$(star-full)"
+      },
+      {
+        "command": "cses.switchJudge",
+        "title": "Switch Site (CSES / AtCoder)",
+        "category": "CSES",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "cses.atcoderLogin",
+        "title": "Login to AtCoder",
+        "category": "CSES",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "cses.atcoderLogout",
+        "title": "Logout of AtCoder",
+        "category": "CSES",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "cses.startContest",
+        "title": "Start Practice Contest",
+        "category": "CSES",
+        "icon": "$(watch)"
+      },
+      {
+        "command": "cses.endContest",
+        "title": "End Practice Contest",
+        "category": "CSES",
+        "icon": "$(stop-circle)"
+      },
+      {
+        "command": "cses.contestNext",
+        "title": "Open Next Contest Problem",
+        "category": "CSES",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "cses.openContest",
+        "title": "Show Contest Board",
+        "category": "CSES",
+        "icon": "$(watch)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "cses.searchProblem",
+          "when": "view == csesStudio.problems",
+          "group": "navigation@1"
+        },
+        {
+          "command": "cses.filterProblems",
+          "when": "view == csesStudio.problems",
+          "group": "navigation@0"
+        },
+        {
+          "command": "cses.filter.unsolved",
+          "when": "view == csesStudio.problems && !cses.filterUnsolved",
+          "group": "navigation@2"
+        },
+        {
+          "command": "cses.filter.all",
+          "when": "view == csesStudio.problems && cses.filterUnsolved",
+          "group": "navigation@2"
+        },
+        {
+          "command": "cses.refresh",
+          "when": "view == csesStudio.problems",
+          "group": "navigation@3"
+        },
+        {
+          "command": "cses.fetchProblems",
+          "when": "view == csesStudio.problems",
+          "group": "overflow@1"
+        },
+        {
+          "command": "cses.syncProgress",
+          "when": "view == csesStudio.problems",
+          "group": "overflow@2"
+        },
+        {
+          "command": "cses.login",
+          "when": "view == csesStudio.problems && !cses.authenticated",
+          "group": "overflow@3"
+        },
+        {
+          "command": "cses.logout",
+          "when": "view == csesStudio.problems && cses.authenticated",
+          "group": "overflow@3"
+        },
+        {
+          "command": "cses.showOutput",
+          "when": "view == csesStudio.problems",
+          "group": "overflow@4"
+        },
+        {
+          "command": "cses.syncProgress",
+          "when": "view == csesStudio.progress",
+          "group": "navigation@1"
+        },
+        {
+          "command": "cses.filter.revision",
+          "when": "view == csesStudio.problems && !cses.filterRevision",
+          "group": "navigation@4"
+        },
+        {
+          "command": "cses.filter.allRevision",
+          "when": "view == csesStudio.problems && cses.filterRevision",
+          "group": "navigation@4"
+        },
+        {
+          "command": "cses.switchJudge",
+          "when": "view == csesStudio.problems",
+          "group": "overflow@0"
+        },
+        {
+          "command": "cses.startContest",
+          "when": "view == csesStudio.contest && !cses.contestRunning",
+          "group": "navigation@0"
+        },
+        {
+          "command": "cses.contestNext",
+          "when": "view == csesStudio.contest && cses.contestRunning",
+          "group": "navigation@0"
+        },
+        {
+          "command": "cses.endContest",
+          "when": "view == csesStudio.contest && cses.contestRunning",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cses.openProblem",
+          "when": "view == csesStudio.problems && viewItem =~ /^problem/",
+          "group": "inline@1"
+        },
+        {
+          "command": "cses.openInBrowser",
+          "when": "view == csesStudio.problems && viewItem =~ /^problem/",
+          "group": "1_open@1"
+        },
+        {
+          "command": "cses.copyProblemId",
+          "when": "view == csesStudio.problems && viewItem =~ /^problem/",
+          "group": "1_open@2"
+        },
+        {
+          "command": "cses.markRevision",
+          "when": "view == csesStudio.problems && viewItem =~ /\\.unmarked$/",
+          "group": "inline@0"
+        },
+        {
+          "command": "cses.unmarkRevision",
+          "when": "view == csesStudio.problems && viewItem =~ /\\.marked$/",
+          "group": "inline@0"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "cses.openProblem",
+          "when": "false"
+        },
+        {
+          "command": "cses.openInBrowser",
+          "when": "false"
+        },
+        {
+          "command": "cses.copyProblemId",
+          "when": "false"
+        },
+        {
+          "command": "cses.filter.all",
+          "when": "false"
+        },
+        {
+          "command": "cses.filter.unsolved",
+          "when": "false"
+        },
+        {
+          "command": "cses.filter.revision",
+          "when": "false"
+        },
+        {
+          "command": "cses.filter.allRevision",
+          "when": "false"
+        },
+        {
+          "command": "cses.markRevision",
+          "when": "false"
+        },
+        {
+          "command": "cses.unmarkRevision",
+          "when": "false"
+        },
+        {
+          "command": "cses.endContest",
+          "when": "cses.contestRunning"
+        },
+        {
+          "command": "cses.contestNext",
+          "when": "cses.contestRunning"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "cses.runSamples",
+          "when": "cses.isSolutionFile",
+          "group": "navigation@1"
+        },
+        {
+          "command": "cses.submit",
+          "when": "cses.isSolutionFile",
+          "group": "navigation@2"
+        },
+        {
+          "command": "cses.openSolveLayout",
+          "when": "cses.isSolutionFile",
+          "group": "navigation@0"
+        },
+        {
+          "command": "cses.toggleRevision",
+          "when": "cses.isSolutionFile",
+          "group": "1_cses@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "cses.runSamples",
+        "key": "ctrl+alt+t",
+        "mac": "cmd+alt+t",
+        "when": "cses.isSolutionFile"
+      },
+      {
+        "command": "cses.submit",
+        "key": "ctrl+alt+s",
+        "mac": "cmd+alt+s",
+        "when": "cses.isSolutionFile"
+      },
+      {
+        "command": "cses.searchProblem",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p"
+      },
+      {
+        "command": "cses.toggleRevision",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m",
+        "when": "cses.isSolutionFile"
+      },
+      {
+        "command": "cses.startContest",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c",
+        "when": "!cses.contestRunning"
+      },
+      {
+        "command": "cses.contestNext",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n",
+        "when": "cses.contestRunning"
+      }
+    ],
+    "configuration": {
+      "title": "CSES Studio",
+      "properties": {
+        "cses.language": {
+          "type": "string",
+          "enum": [
+            "cpp",
+            "python"
+          ],
+          "enumDescriptions": [
+            "C++ (compiled with the configured compiler)",
+            "Python 3 (interpreted)"
+          ],
+          "default": "cpp",
+          "description": "Language used when generating solution files and submitting."
+        },
+        "cses.workspaceRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Directory where problem workspaces are created. Defaults to the first folder of the current workspace, or ~/cses-studio when no folder is open."
+        },
+        "cses.compiler.cpp": {
+          "type": "string",
+          "default": "g++",
+          "description": "C++ compiler executable."
+        },
+        "cses.compiler.cppArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "-std=c++17",
+            "-O2",
+            "-Wall"
+          ],
+          "description": "Arguments passed to the C++ compiler before the input and output paths."
+        },
+        "cses.compiler.python": {
+          "type": "string",
+          "default": "python3",
+          "description": "Python interpreter executable."
+        },
+        "cses.template.cpp": {
+          "type": "string",
+          "editPresentation": "multilineText",
+          "default": "",
+          "description": "Template for generated C++ files. Supports ${title}, ${id}, ${url}, ${category}, ${date}. Leave empty to use the built-in template."
+        },
+        "cses.template.python": {
+          "type": "string",
+          "editPresentation": "multilineText",
+          "default": "",
+          "description": "Template for generated Python files. Supports ${title}, ${id}, ${url}, ${category}, ${date}. Leave empty to use the built-in template."
+        },
+        "cses.autoFetch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Fetch the problem index automatically on first activation when no cache exists."
+        },
+        "cses.autoGenerateSamples": {
+          "type": "boolean",
+          "default": true,
+          "description": "Write sample test files into .samples/ when a problem workspace is created."
+        },
+        "cses.autoOpenStatement": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open the statement webview beside the editor when a problem is opened."
+        },
+        "cses.timeLimitFactor": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "description": "Multiplier applied to the problem's time limit when running local tests before a run is killed."
+        },
+        "cses.trimTrailingWhitespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ignore trailing whitespace and blank trailing lines when comparing sample output."
+        },
+        "cses.concurrency": {
+          "type": "number",
+          "default": 6,
+          "minimum": 1,
+          "maximum": 16,
+          "description": "Number of problem statements fetched in parallel."
+        },
+        "cses.statementFontSize": {
+          "type": "number",
+          "default": 15,
+          "minimum": 10,
+          "maximum": 28,
+          "description": "Base font size (px) for the problem statement view."
+        },
+        "cses.atcoder.languageId": {
+          "type": "number",
+          "default": 0,
+          "markdownDescription": "AtCoder language id to submit with. `0` reads the list from AtCoder's submit page and picks the newest GCC C++ or PyPy3 automatically. Set an explicit id only to override that choice."
+        },
+        "cses.contest.problems": {
+          "type": "number",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Problems drafted into a new practice contest."
+        },
+        "cses.contest.minutes": {
+          "type": "number",
+          "default": 90,
+          "minimum": 5,
+          "maximum": 600,
+          "description": "Default length of a practice contest, in minutes."
+        },
+        "cses.atcoder.username": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Your AtCoder username, used to sync solved status from the public [AtCoder Problems](https://kenkoooo.com/atcoder) API. No password is required for syncing. Left blank, you are prompted once."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "tsc --outDir out && node --test out/test/*.test.js",
+    "vsix": "npx @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "katex": "^0.16.47",
+    "node-html-parser": "^6.1.13"
+  }
+}
