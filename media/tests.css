@@ -1,0 +1,338 @@
+/*
+ * Bottom test panel: sample cases, custom input and results, sitting under the
+ * editor the way a LeetCode testcase pane does.
+ */
+
+:root {
+  --border: var(--vscode-panel-border, rgba(128, 128, 128, 0.3));
+  --muted: var(--vscode-descriptionForeground);
+  --pass: var(--vscode-testing-iconPassed, #3fb950);
+  --fail: var(--vscode-testing-iconFailed, #f85149);
+  --warn: var(--vscode-testing-iconQueued, #d29922);
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-panel-background, var(--vscode-editor-background));
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.problem {
+  font-weight: 600;
+  font-size: 0.92em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+}
+
+.problem .pid {
+  color: var(--muted);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.spacer {
+  flex: 1;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.88em;
+  padding: 5px 13px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+.btn-run {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  font-weight: 600;
+}
+
+.btn-run:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--vscode-foreground);
+  border-color: var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--vscode-list-hoverBackground);
+}
+
+/* ---------- Tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 0.85em;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tab:hover {
+  color: var(--vscode-foreground);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--vscode-foreground);
+  border-bottom-color: var(--vscode-focusBorder);
+}
+
+.tab .mark {
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+
+.tab .mark.pass {
+  color: var(--pass);
+}
+.tab .mark.fail {
+  color: var(--fail);
+}
+.tab .mark.warn {
+  color: var(--warn);
+}
+
+/* Cases imported from a real submission, distinct from statement samples. */
+.tab.judge {
+  font-style: italic;
+}
+
+.judge-note {
+  font-size: 0.8em;
+  color: var(--muted);
+  border-left: 2px solid var(--warn);
+  padding: 4px 9px;
+  margin-bottom: 10px;
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.08));
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* ---------- Body ---------- */
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  min-height: 0;
+}
+
+.pane[hidden] {
+  display: none;
+}
+
+.io-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .io-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.io-title {
+  font-size: 0.74em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+pre.io {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.9em;
+  margin: 0;
+  padding: 9px 11px;
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.13));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  white-space: pre;
+  overflow: auto;
+  max-height: 200px;
+  min-height: 42px;
+}
+
+pre.io.bad {
+  border-color: var(--fail);
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.9em;
+  padding: 9px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--vscode-input-border, var(--border));
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+textarea:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  border-color: var(--vscode-focusBorder);
+}
+
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.95em;
+  margin-bottom: 10px;
+}
+
+.verdict.pass {
+  color: var(--pass);
+}
+.verdict.fail {
+  color: var(--fail);
+}
+.verdict.warn {
+  color: var(--warn);
+}
+
+.verdict .timing {
+  font-weight: 400;
+  font-size: 0.86em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary {
+  font-size: 0.85em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.section-gap {
+  margin-top: 12px;
+}
+
+/* Diff colours come from the editor's own diff theme. */
+.diff-line {
+  display: block;
+  padding: 0 4px;
+  white-space: pre;
+}
+
+.diff-line.added {
+  background: var(--vscode-diffEditor-insertedTextBackground, rgba(63, 185, 80, 0.2));
+}
+
+.diff-line.removed {
+  background: var(--vscode-diffEditor-removedTextBackground, rgba(248, 81, 73, 0.2));
+}
+
+.diff-line.context {
+  opacity: 0.7;
+}
+
+.diff-gutter {
+  display: inline-block;
+  width: 1.4em;
+  opacity: 0.55;
+  user-select: none;
+}
+
+/* Replaces inline opacity styles, which strict CSP blocks. */
+.dim {
+  opacity: 0.65;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.9em;
+  text-align: center;
+  padding: 26px 16px;
+  line-height: 1.7;
+}
+
+.spinner {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
