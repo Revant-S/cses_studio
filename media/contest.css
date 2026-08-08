@@ -1,0 +1,489 @@
+/*
+ * Practice contest sidebar: topic picker, countdown and board.
+ *
+ * Sized for a narrow sidebar column, so everything stacks and nothing relies on
+ * horizontal room. Colours come from the theme rather than fixed values.
+ */
+
+:root {
+  --border: var(--vscode-panel-border, rgba(128, 128, 128, 0.3));
+  --muted: var(--vscode-descriptionForeground);
+  --pass: var(--vscode-testing-iconPassed, #3fb950);
+  --fail: var(--vscode-testing-iconFailed, #f85149);
+  --warn: var(--vscode-testing-iconQueued, #d29922);
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 10px 12px 20px;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
+
+h2 {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+}
+
+.dim {
+  color: var(--muted);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.hint {
+  font-size: 0.82em;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.9em;
+  text-align: center;
+  padding: 30px 12px;
+  line-height: 1.8;
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  font-family: inherit;
+  font-size: 0.88em;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  background: transparent;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 8px 14px;
+  font-weight: 600;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.btn-ghost {
+  width: 100%;
+  padding: 7px 14px;
+  border-color: var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.link {
+  padding: 2px 4px;
+  font-size: 0.82em;
+  color: var(--vscode-textLink-foreground);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Blocks ---------- */
+
+.block {
+  margin-bottom: 14px;
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.label {
+  font-size: 0.74em;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+/* ---------- Topics ---------- */
+
+.topics {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+
+.topic,
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 7px;
+  text-align: left;
+}
+
+.topic:hover:not(:disabled),
+.check:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.topic.on,
+.check.on {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.tick {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.topic-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+/* ---------- Chips ---------- */
+
+.chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.75em;
+  white-space: nowrap;
+  background: rgba(128, 128, 128, 0.18);
+  color: var(--muted);
+}
+
+.chip.hot,
+.chip.revision {
+  background: rgba(210, 153, 34, 0.2);
+  color: var(--warn);
+}
+
+.chip.struggled {
+  background: rgba(248, 81, 73, 0.18);
+  color: var(--fail);
+}
+
+.chip.attempted {
+  background: rgba(128, 128, 128, 0.22);
+  color: var(--vscode-foreground);
+}
+
+/* ---------- Stepper and pills ---------- */
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.stepper button {
+  padding: 4px 12px;
+  border-radius: 0;
+  font-size: 1.05em;
+}
+
+.stepper button:hover:not(:disabled) {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.stepper-value {
+  min-width: 38px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 4px 0;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pill {
+  padding: 4px 11px;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.pill:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.pill.on {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* ---------- Preview ---------- */
+
+.preview {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  background: var(--vscode-textBlockQuote-background, rgba(128, 128, 128, 0.07));
+}
+
+.preview-head {
+  font-size: 0.9em;
+  margin-bottom: 7px;
+}
+
+.mix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ---------- Clock ---------- */
+
+.clock,
+.score {
+  text-align: center;
+  padding: 14px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+
+.clock-time,
+.score-value {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 2.4em;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock.low .clock-time {
+  color: var(--fail);
+}
+
+.clock-sub,
+.score-sub {
+  font-size: 0.82em;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.bar {
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: rgba(128, 128, 128, 0.22);
+  overflow: hidden;
+}
+
+.bar .fill {
+  height: 100%;
+  /* Must default to zero: the strict CSP drops inline styles, so a width that
+     never arrives through the CSSOM would otherwise render as a full bar. */
+  width: 0;
+  background: var(--vscode-progressBar-background, var(--vscode-button-background));
+  transition: width 0.9s linear;
+}
+
+.clock.low .bar .fill {
+  background: var(--fail);
+}
+
+.score .bar .fill {
+  background: var(--pass);
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar .fill {
+    transition: none;
+  }
+}
+
+/* ---------- Problem board ---------- */
+
+.probs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.prob {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  text-align: left;
+  border-color: var(--border);
+}
+
+.prob:hover:not(:disabled) {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.prob.solved {
+  border-color: rgba(63, 185, 80, 0.5);
+}
+
+.prob.opened {
+  border-left: 2px solid var(--vscode-focusBorder);
+}
+
+.prob-label {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8em;
+  background: rgba(128, 128, 128, 0.2);
+}
+
+.prob.solved .prob-label {
+  background: rgba(63, 185, 80, 0.25);
+  color: var(--pass);
+}
+
+.prob-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.prob-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prob-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78em;
+}
+
+.prob-state {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--muted);
+  font-size: 0.8em;
+}
+
+.prob-state .ok {
+  color: var(--pass);
+  font-size: 1.1em;
+}
+
+.prob-state .took {
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  margin-bottom: 10px;
+}
+
+/* ---------- History ---------- */
+
+.history {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.hist {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hist-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.85em;
+}
+
+.hist-score {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.hist-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hist-body span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
