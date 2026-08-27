@@ -1,6 +1,7 @@
 {
   "name": "cses-studio",
   "displayName": "CSES Studio",
+  "icon": "resources/icon.png",
   "description": "Browse, solve, test and submit CSES Problem Set tasks without leaving VS Code.",
   "version": "0.1.0",
   "publisher": "cses-studio",
@@ -11,9 +12,9 @@
     "url": "https://github.com/Revant-S/cses_studio.git"
   },
   "bugs": {
-    "url": "https://github.com/Revant-S/cses-studio/issues"
+    "url": "https://github.com/Revant-S/cses_studio/issues"
   },
-  "homepage": "https://github.com/Revant-S/cses-studio#readme",
+  "homepage": "https://github.com/Revant-S/cses_studio#readme",
   "engines": {
     "vscode": "^1.85.0"
   },
