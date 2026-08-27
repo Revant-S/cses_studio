@@ -1,3 +1,4 @@
+import * as net from 'node:net';
 import { NetworkError } from '../core/errors';
 import type { Logger } from '../core/logger';
 import { CookieJar, type StoredCookie } from './cookieJar';
@@ -8,8 +9,35 @@ const USER_AGENT =
   'Mozilla/5.0 (compatible; CSES-Studio VS Code extension; +https://github.com/cses-studio)';
 
 const MAX_GET_ATTEMPTS = 3;
+const MAX_POST_ATTEMPTS = 3;
 const MAX_REDIRECTS = 8;
 const RETRY_BASE_DELAY_MS = 600;
+
+/** How long a single address gets to complete its connect. */
+const CONNECT_ATTEMPT_WINDOW_MS = 1_500;
+
+let connectWindowWidened = false;
+
+/** Widens the connect window process-wide, once. */
+function widenConnectAttemptWindow(log: Logger): void {
+  if (connectWindowWidened) {
+    return;
+  }
+  connectWindowWidened = true;
+
+  try {
+    const current = net.getDefaultAutoSelectFamilyAttemptTimeout?.();
+    if (typeof current === 'number' && current >= CONNECT_ATTEMPT_WINDOW_MS) {
+      return;
+    }
+    net.setDefaultAutoSelectFamilyAttemptTimeout?.(CONNECT_ATTEMPT_WINDOW_MS);
+    log.debug(
+      `Connect attempt window raised from ${current ?? 'the default'}ms to ${CONNECT_ATTEMPT_WINDOW_MS}ms`,
+    );
+  } catch (error) {
+    log.debug(`Could not raise the connect attempt window: ${String(error)}`);
+  }
+}
 
 /** Transport failures worth retrying. */
 const TRANSIENT_CODES = new Set([
@@ -25,32 +53,61 @@ const TRANSIENT_CODES = new Set([
   'UND_ERR_HEADERS_TIMEOUT',
 ]);
 
-function isTransient(error: unknown): boolean {
-  for (const code of collectCodes(error)) {
-    if (TRANSIENT_CODES.has(code)) {
-      return true;
-    }
-  }
-  return false;
+/** Codes and syscalls raised while a connection is still being established. */
+const CONNECT_SYSCALLS = new Set(['connect', 'getaddrinfo', 'lookup', 'querya', 'queryaaaa']);
+const CONNECT_CODES = new Set(['UND_ERR_CONNECT_TIMEOUT', 'ENOTFOUND', 'EAI_AGAIN']);
+
+/** One link in a failure chain, as `fetch` reports it. */
+interface TransportFailure {
+  readonly code?: string;
+  readonly syscall?: string;
+  /** No nested error underneath, i.e. the actual thing that went wrong. */
+  readonly leaf: boolean;
 }
 
-function collectCodes(error: unknown, depth = 0): string[] {
+function isTransient(error: unknown): boolean {
+  return collectFailures(error).some(
+    (failure) => failure.code !== undefined && TRANSIENT_CODES.has(failure.code),
+  );
+}
+
+/** True when the request provably never left this machine. */
+function isConnectFailure(error: unknown): boolean {
+  const leaves = collectFailures(error).filter((failure) => failure.leaf);
+  return (
+    leaves.length > 0 &&
+    leaves.every(
+      (failure) =>
+        (failure.syscall !== undefined && CONNECT_SYSCALLS.has(failure.syscall.toLowerCase())) ||
+        (failure.code !== undefined && CONNECT_CODES.has(failure.code)),
+    )
+  );
+}
+
+function collectFailures(error: unknown, depth = 0): TransportFailure[] {
   if (depth > 4 || !(error instanceof Error)) {
     return [];
   }
-  const codes: string[] = [];
-  const code = (error as Error & { code?: unknown }).code;
-  if (typeof code === 'string') {
-    codes.push(code);
-  }
+
+  const nested: TransportFailure[] = [];
   const aggregated = (error as AggregateError & { errors?: unknown }).errors;
   if (Array.isArray(aggregated)) {
-    for (const nested of aggregated) {
-      codes.push(...collectCodes(nested, depth + 1));
+    for (const child of aggregated) {
+      nested.push(...collectFailures(child, depth + 1));
     }
   }
-  codes.push(...collectCodes((error as Error & { cause?: unknown }).cause, depth + 1));
-  return codes;
+  nested.push(...collectFailures((error as Error & { cause?: unknown }).cause, depth + 1));
+
+  const code = (error as Error & { code?: unknown }).code;
+  const syscall = (error as Error & { syscall?: unknown }).syscall;
+  return [
+    {
+      ...(typeof code === 'string' ? { code } : {}),
+      ...(typeof syscall === 'string' ? { syscall } : {}),
+      leaf: nested.length === 0,
+    },
+    ...nested,
+  ];
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -94,7 +151,9 @@ export class CsesClient {
   constructor(
     private readonly log: Logger,
     private readonly origin: string = CSES_ORIGIN,
-  ) {}
+  ) {
+    widenConnectAttemptWindow(log);
+  }
 
   get baseUrl(): string {
     return this.origin;
@@ -136,14 +195,14 @@ export class CsesClient {
     return this.request('POST', pathname, form, options);
   }
 
-  /** Sends a request, retrying transient transport failures. */
+  /** Sends a request, retrying transport failures that can be replayed safely. */
   private async request(
     method: string,
     pathname: string,
     body: RequestBody | undefined,
     options: RequestOptions,
   ): Promise<HttpResponse> {
-    const attempts = method === 'GET' ? MAX_GET_ATTEMPTS : 1;
+    const attempts = method === 'GET' ? MAX_GET_ATTEMPTS : MAX_POST_ATTEMPTS;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -151,7 +210,8 @@ export class CsesClient {
         return await this.attempt(method, pathname, body, options);
       } catch (error) {
         lastError = error;
-        const retriable = attempt < attempts && isTransient(error) && !options.signal?.aborted;
+        const replayable = method === 'GET' ? isTransient(error) : isConnectFailure(error);
+        const retriable = attempt < attempts && replayable && !options.signal?.aborted;
         if (!retriable) {
           break;
         }
