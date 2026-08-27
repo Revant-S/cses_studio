@@ -1,5 +1,12 @@
+# Build output
 node_modules/
 dist/
 out/
 *.vsix
 .vscode-test/
+
+# Local notes and scratch
+requirement.md
+*.local.json
+scratch/
+notes/

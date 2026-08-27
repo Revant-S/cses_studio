@@ -9,5 +9,6 @@ node_modules/**
 esbuild.js
 tsconfig.json
 requirement.md
+.*/**
 **/*.map
 **/*.ts
