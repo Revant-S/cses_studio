@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.1]
 
 ### Fixed
 
@@ -8,8 +8,8 @@
   a webview resolves against its own `vscode-webview://` origin, so they 404ed.
 - Figures drawn inside an example's explanation were dropped entirely, along with
   any explanation text that followed them.
-- Submissions failing with `connect ETIMEDOUT` even when the site was reachable.
-  Node only gave each address 250ms to connect, which is not enough for cses.fi.
+
+## [0.1.0] - Initial release
 
 ### Added
 
@@ -19,11 +19,6 @@
 - Failed attempts are counted per problem, not just timestamped.
 - Settings `cses.contest.problems` and `cses.contest.minutes`.
 - Keybindings `Ctrl+Alt+C` and `Ctrl+Alt+N`.
-
-## [0.1.0] - Initial release
-
-### Added
-
 - Problem explorer with categories, solve status and an unsolved-only filter.
 - Scraper for the full problem set: 400 problems across 18 categories, with
   limits, constraints and samples.
@@ -37,3 +32,8 @@
 - Progress tracking, synced from the account.
 - Quick-pick search over title, id and category.
 - Status bar showing sign-in state and progress.
+
+### Fixed
+
+- Submissions failing with `connect ETIMEDOUT` even when the site was reachable.
+  Node only gave each address 250ms to connect, which is not enough for cses.fi.

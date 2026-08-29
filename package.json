@@ -3,7 +3,7 @@
   "displayName": "CSES Studio",
   "icon": "resources/icon.png",
   "description": "Browse, solve, test and submit CSES Problem Set tasks without leaving VS Code.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "RevantSinha",
   "license": "MIT",
   "author": "Revant Sinha",
@@ -625,11 +625,11 @@
     "vsix": "npx @vscode/vsce package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.19.43",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.28.2",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.3"
