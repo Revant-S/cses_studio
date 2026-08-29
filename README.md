@@ -102,8 +102,6 @@ npm run vsix      # package a .vsix
 
 `F5` launches an Extension Development Host. The tests compile and run real C++, so `g++` must be on `PATH`.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how it fits together.
-
 ## Notes
 
 - Submission is written against the documented CSES flow but has not been run against a live account in this build.
