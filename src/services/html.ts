@@ -85,3 +85,49 @@ export function sanitizeHtml(root: HTMLElement): HTMLElement {
   }
   return root;
 }
+
+/** Attributes that can carry a URL in a scraped statement. */
+const URL_ATTRIBUTES = ['src', 'href'] as const;
+
+/**
+ * Rewrites site-relative URLs in a statement to absolute ones.
+ *
+ * Statements render inside a webview served from `vscode-webview://…`, so a
+ * relative `src="/file/abc"` resolves against that origin and the image never
+ * loads. Resolving against the problem's own page URL keeps images and links
+ * pointing back at the judge. Absolute URLs pass through untouched, so this is
+ * safe to apply to a statement that was already normalized.
+ */
+export function resolveUrls(html: string, baseUrl: string): string {
+  if (!html.trim()) {
+    return html;
+  }
+
+  const root = parseHtml(html);
+  let rewritten = false;
+
+  for (const element of root.querySelectorAll('[src], [href]')) {
+    for (const name of URL_ATTRIBUTES) {
+      const value = element.getAttribute(name);
+      // In-page anchors must stay relative or they stop scrolling the panel.
+      if (value === undefined || value === '' || value.startsWith('#')) {
+        continue;
+      }
+      const absolute = toAbsoluteUrl(value, baseUrl);
+      if (absolute && absolute !== value) {
+        element.setAttribute(name, absolute);
+        rewritten = true;
+      }
+    }
+  }
+  return rewritten ? root.toString() : html;
+}
+
+function toAbsoluteUrl(value: string, baseUrl: string): string | undefined {
+  try {
+    return new URL(value, baseUrl).toString();
+  } catch {
+    // A URL neither the parser nor a browser can make sense of; leave it be.
+    return undefined;
+  }
+}

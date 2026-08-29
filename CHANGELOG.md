@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Statement figures never loading. Images are written as site-relative URLs, which
+  a webview resolves against its own `vscode-webview://` origin, so they 404ed.
+- Figures drawn inside an example's explanation were dropped entirely, along with
+  any explanation text that followed them.
 - Submissions failing with `connect ETIMEDOUT` even when the site was reachable.
   Node only gave each address 250ms to connect, which is not enough for cses.fi.
 

@@ -3,6 +3,8 @@ import type { ConfigurationProvider } from '../core/config';
 import { toMessage } from '../core/errors';
 import type { Logger } from '../core/logger';
 import { type Problem, ProblemStatus } from '../models/problem';
+import type { Sample } from '../models/sample';
+import { resolveUrls } from '../services/html';
 import type { ProgressService } from '../services/progress';
 import type { SampleTestResult, TestService } from '../services/testService';
 import type { WorkspaceService } from '../services/workspace';
@@ -217,11 +219,11 @@ export class ProblemWebviewManager implements vscode.Disposable {
     <button class="btn-secondary btn-compact" data-action="open-editor">Editor</button>
   </div>
   ${this.renderHeader(problem, status)}
-  ${renderSection('Statement', problem.statement)}
-  ${renderSection('Input', problem.input)}
-  ${renderSection('Output', problem.output)}
-  ${renderSection('Constraints', problem.constraints)}
-  ${renderSection('Notes', problem.notes)}
+  ${renderSection('Statement', problem.statement, problem.url)}
+  ${renderSection('Input', problem.input, problem.url)}
+  ${renderSection('Output', problem.output, problem.url)}
+  ${renderSection('Constraints', problem.constraints, problem.url)}
+  ${renderSection('Notes', problem.notes, problem.url)}
   ${this.renderSamples(problem)}
   ${this.renderTestRunner()}
 </div>
@@ -288,7 +290,7 @@ export class ProblemWebviewManager implements vscode.Disposable {
       <pre id="${outputId}">${escapeHtml(sample.output)}</pre>
     </div>
   </div>
-  ${sample.explanation ? `<div class="sample-explanation">${escapeHtml(sample.explanation)}</div>` : ''}
+  ${renderExplanation(sample, problem.url)}
 </div>`;
     });
 
@@ -332,13 +334,33 @@ export class ProblemWebviewManager implements vscode.Disposable {
   }
 }
 
-function renderSection(title: string, html: string): string {
+/**
+ * Prefers the explanation's own markup, so the figure CSES draws for a sample
+ * and its inline math both survive. Statements cached before that markup was
+ * kept only carry plain text, which still renders escaped.
+ */
+function renderExplanation(sample: Sample, baseUrl: string): string {
+  if (sample.explanationHtml) {
+    return `<div class="sample-explanation prose">${resolveUrls(sample.explanationHtml, baseUrl)}</div>`;
+  }
+  if (sample.explanation) {
+    return `<div class="sample-explanation">${escapeHtml(sample.explanation)}</div>`;
+  }
+  return '';
+}
+
+/**
+ * Renders one statement section, with its URLs resolved against the problem
+ * page. Statements are cached as scraped, so this runs at render time to also
+ * cover the copies downloaded before relative URLs were being resolved.
+ */
+function renderSection(title: string, html: string, baseUrl: string): string {
   if (!html.trim()) {
     return '';
   }
   return `<section>
   <h2 class="section-title">${title}</h2>
-  <div class="prose">${html}</div>
+  <div class="prose">${resolveUrls(html, baseUrl)}</div>
 </section>`;
 }
 
