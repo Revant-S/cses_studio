@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2]
+
+### Changed
+
+- Dropped a stale docs pointer from the README, which is also the description
+  shown on the Marketplace page.
+
 ## [0.1.1]
 
 ### Fixed

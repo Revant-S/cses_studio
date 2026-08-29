@@ -3,7 +3,7 @@
   "displayName": "CSES Studio",
   "icon": "resources/icon.png",
   "description": "Browse, solve, test and submit CSES Problem Set tasks without leaving VS Code.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "RevantSinha",
   "license": "MIT",
   "author": "Revant Sinha",
