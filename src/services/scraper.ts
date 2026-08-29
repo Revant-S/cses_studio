@@ -210,10 +210,15 @@ function renderSection(nodes: readonly HTMLElement[]): string {
     .trim();
 }
 
+/** Headings that start a new block rather than explain the previous one. */
+const SAMPLE_LABEL = /^(input|output|example)\b/i;
+
 /** Builds sample cases from the Example section. */
 export function parseSamples(nodes: readonly HTMLElement[]): Sample[] {
   const samples: Sample[] = [];
-  let pending: { input?: string; output?: string; explanation?: string } = {};
+  let pending: { input?: string; output?: string; explanation: HTMLElement[] } = {
+    explanation: [],
+  };
 
   const flush = (): void => {
     if (pending.input === undefined && pending.output === undefined) {
@@ -223,12 +228,16 @@ export function parseSamples(nodes: readonly HTMLElement[]): Sample[] {
       index: samples.length + 1,
       input: pending.input ?? '',
       output: pending.output ?? '',
-      ...(pending.explanation ? { explanation: pending.explanation } : {}),
+      ...explanationOf(pending.explanation),
     });
-    pending = {};
+    pending = { explanation: [] };
   };
 
   let lastLabel = '';
+  // Everything between the expected output and the next block explains the
+  // case just shown — including the figure CSES draws for it.
+  let afterOutput = false;
+
   for (const node of nodes) {
     const tag = node.rawTagName?.toLowerCase();
     if (!tag) {
@@ -238,25 +247,55 @@ export function parseSamples(nodes: readonly HTMLElement[]): Sample[] {
       const content = preformattedText(node);
       if (lastLabel.startsWith('output')) {
         pending.output = content;
+        afterOutput = true;
       } else {
         // An input while one is buffered means the previous sample ended.
         if (pending.input !== undefined) {
           flush();
         }
         pending.input = content;
+        afterOutput = false;
       }
       lastLabel = '';
       continue;
     }
     const text = normalizeText(node.text);
+    // Interactive tasks print one transcript with no separate output block, so
+    // the "Explanation" paragraph is the only marker for where prose starts.
     if (/^explanation/i.test(text)) {
-      pending.explanation = text.replace(/^explanation:?\s*/i, '');
+      afterOutput = true;
+    }
+    if (afterOutput && !SAMPLE_LABEL.test(text)) {
+      pending.explanation.push(node);
       continue;
     }
     if (text) {
       lastLabel = text.toLowerCase();
+      afterOutput = false;
     }
   }
   flush();
   return samples;
+}
+
+/** Keeps the explanation both as prose and as markup, so figures survive. */
+function explanationOf(nodes: readonly HTMLElement[]): {
+  explanation?: string;
+  explanationHtml?: string;
+} {
+  const html = nodes
+    .map((node) => node.toString())
+    .join('')
+    .trim();
+  const text = normalizeText(nodes.map((node) => node.text).join(' ')).replace(
+    /^explanation:?\s*/i,
+    '',
+  );
+  if (!text && !html) {
+    return {};
+  }
+  return {
+    ...(text ? { explanation: text } : {}),
+    ...(html ? { explanationHtml: html } : {}),
+  };
 }

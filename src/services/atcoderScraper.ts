@@ -143,6 +143,7 @@ function parseSamples(sections: ReadonlyMap<string, HTMLElement[]>): Sample[] {
   const inputs = new Map<number, string>();
   const outputs = new Map<number, string>();
   const explanations = new Map<number, string>();
+  const explanationMarkup = new Map<number, string>();
 
   for (const [heading, nodes] of sections) {
     const match = /^sample (input|output)\s*(\d+)/.exec(heading);
@@ -159,14 +160,19 @@ function parseSamples(sections: ReadonlyMap<string, HTMLElement[]>): Sample[] {
       inputs.set(index, preformattedText(pre));
     } else {
       outputs.set(index, preformattedText(pre));
-      // Any prose after the expected output explains the case.
-      const note = nodes
-        .filter((node) => node.rawTagName?.toLowerCase() === 'p')
+      // Any prose after the expected output explains the case; keep the markup
+      // too so a figure drawn inside it survives.
+      const prose = nodes.filter((node) => node.rawTagName?.toLowerCase() === 'p');
+      const note = prose
         .map((node) => normalizeText(node.text))
         .join(' ')
         .trim();
       if (note) {
         explanations.set(index, note);
+        explanationMarkup.set(
+          index,
+          convertVarToMath(prose.map((node) => node.toString()).join('')),
+        );
       }
     }
   }
@@ -175,11 +181,13 @@ function parseSamples(sections: ReadonlyMap<string, HTMLElement[]>): Sample[] {
     .sort((a, b) => a - b)
     .map((index) => {
       const explanation = explanations.get(index);
+      const explanationHtml = explanationMarkup.get(index);
       return {
         index,
         input: inputs.get(index) ?? '',
         output: outputs.get(index) ?? '',
         ...(explanation ? { explanation } : {}),
+        ...(explanationHtml ? { explanationHtml } : {}),
       };
     });
 }

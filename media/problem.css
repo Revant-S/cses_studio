@@ -277,6 +277,23 @@ h2.section-title {
   color: var(--vscode-textLink-activeForeground);
 }
 
+/*
+ * Statement diagrams. CSES draws them as line art on white and tags them
+ * `invertible`, flipping them in its own dark theme; matching that keeps a
+ * dark VS Code theme from showing a glaring white block. The hue rotation
+ * puts the coloured labels back where they started.
+ */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+body.vscode-dark .prose img.invertible,
+body.vscode-high-contrast:not(.vscode-high-contrast-light) .prose img.invertible {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .prose table {
   border-collapse: collapse;
   width: 100%;
@@ -381,6 +398,11 @@ h2.section-title {
   border-top: 1px solid var(--cses-border);
   font-size: 0.9em;
   color: var(--cses-muted);
+}
+
+/* The explanation keeps its own markup, so close its trailing gap. */
+.sample-explanation.prose > *:last-child {
+  margin-bottom: 0;
 }
 
 /* ---------- Custom test ---------- */
